@@ -5,12 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clock</title>
     <style>
+        /* Reset default browser styling */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
+        /* Main body styling - black background, white text, centered content */
         body {
             background: #000;
             color: #fff;
@@ -21,6 +23,7 @@
             height: 100vh;
         }
 
+        /* Toggle button (switches between digital/analog) - top right */
         #toggle {
             position: fixed;
             top: 20px;
@@ -37,6 +40,7 @@
             background: #555;
         }
 
+        /* Mode button (switches between tick/glide) - only visible in analog mode */
         #mode {
             position: fixed;
             top: 20px;
@@ -47,13 +51,14 @@
             padding: 10px 20px;
             cursor: pointer;
             font-family: monospace;
-            display: none;
+            display: none; /* Hidden by default until analog mode is active */
         }
 
         #mode:hover {
             background: #555;
         }
 
+        /* Numbers button (toggles clock numbers/markers) - only visible in analog mode */
         #numbers {
             position: fixed;
             top: 60px;
@@ -64,13 +69,14 @@
             padding: 10px 20px;
             cursor: pointer;
             font-family: monospace;
-            display: none;
+            display: none; /* Hidden by default until analog mode is active */
         }
 
         #numbers:hover {
             background: #555;
         }
 
+        /* Hide button - toggles visibility of all control buttons */
         #hideBtn {
             position: fixed;
             bottom: 20px;
@@ -88,15 +94,18 @@
             background: #555;
         }
 
+        /* Digital clock display styling */
         #digital {
             font-size: 80px;
             letter-spacing: 5px;
         }
 
+        /* Analog clock container - hidden by default */
         #analog {
             display: none;
         }
 
+        /* Circular clock face with white border */
         .clock-face {
             width: 400px;
             height: 400px;
@@ -105,46 +114,53 @@
             position: relative;
         }
 
+        /* Base styling for all markers (hour and minute) */
         .marker {
             position: absolute;
             background: #fff;
             left: 50%;
             top: 0;
-            transform-origin: center 200px;
+            transform-origin: center 200px; /* Pivot point at center of clock */
         }
 
+        /* Hour markers (thicker, longer) - appear every 5 minutes */
         .hour-marker {
             width: 4px;
             height: 20px;
             margin-left: -2px;
         }
 
+        /* Minute markers (thinner, shorter) */
         .minute-marker {
             width: 2px;
             height: 10px;
             margin-left: -1px;
         }
 
+        /* Base styling for all clock hands */
         .hand {
             position: absolute;
             bottom: 50%;
             left: 50%;
-            transform-origin: bottom center;
+            transform-origin: bottom center; /* Rotate from bottom (center of clock) */
             background: #fff;
         }
 
+        /* Hour hand - thickest, shortest */
         .hour {
             width: 6px;
             height: 120px;
             margin-left: -3px;
         }
 
+        /* Minute hand - medium thickness and length */
         .minute {
             width: 4px;
             height: 160px;
             margin-left: -2px;
         }
 
+        /* Second hand - thinnest, longest, red color */
         .second {
             width: 2px;
             height: 180px;
@@ -152,6 +168,7 @@
             background: #f00;
         }
 
+        /* Center dot covering the pivot point of all hands */
         .center {
             position: absolute;
             top: 50%;
@@ -164,13 +181,14 @@
             z-index: 10;
         }
 
+        /* Clock number styling (1-12) */
         .number {
             position: absolute;
             left: 50%;
             top: 50%;
             width: 40px;
             height: 40px;
-            display: none;
+            display: none; /* Hidden by default */
             align-items: center;
             justify-content: center;
             margin-left: -20px;
@@ -179,10 +197,12 @@
             font-weight: bold;
         }
 
+        /* Show numbers when toggled */
         .number.show {
             display: flex;
         }
 
+        /* Inner container for number text */
         .number-inner {
             display: flex;
             align-items: center;
@@ -191,25 +211,29 @@
     </style>
 </head>
 <body>
+    <!-- Control buttons -->
     <button id="toggle">ANALOG</button>
     <button id="mode">GLIDE</button>
     <button id="numbers">NUMBERS</button>
     <button id="hideBtn">:3</button>
     
+    <!-- Digital clock display -->
     <div id="digital">00:00:00</div>
     
+    <!-- Analog clock display -->
     <div id="analog">
         <div class="clock-face">
-            <div id="markers"></div>
-            <div id="clockNumbers"></div>
+            <div id="markers"></div> <!-- Container for 60 markers -->
+            <div id="clockNumbers"></div> <!-- Container for 12 numbers -->
             <div class="hand hour" id="hour"></div>
             <div class="hand minute" id="minute"></div>
             <div class="hand second" id="second"></div>
-            <div class="center"></div>
+            <div class="center"></div> <!-- Center dot -->
         </div>
     </div>
 
     <script>
+        // Get references to DOM elements
         const digital = document.getElementById('digital');
         const analog = document.getElementById('analog');
         const toggle = document.getElementById('toggle');
@@ -222,27 +246,35 @@
         const markers = document.getElementById('markers');
         const clockNumbers = document.getElementById('clockNumbers');
         
-        let isDigital = true;
-        let isGliding = false;
-        let showNumbers = false;
-        let buttonsHidden = false;
-        let animationFrame;
+        // State variables
+        let isDigital = true; // True = digital mode, false = analog mode
+        let isGliding = false; // True = smooth animation, false = ticking seconds
+        let showNumbers = false; // True = show 1-12 numbers, false = show only markers
+        let buttonsHidden = false; // True = all buttons hidden, false = buttons visible
+        let animationFrame; // Store requestAnimationFrame ID for glide mode
 
+        // Generate 60 markers around the clock face (12 hour markers + 48 minute markers)
         for (let i = 0; i < 60; i++) {
             const marker = document.createElement('div');
+            // Every 5th marker is an hour marker (thicker), others are minute markers
             marker.className = i % 5 === 0 ? 'marker hour-marker' : 'marker minute-marker';
+            // Rotate each marker by 6 degrees (360° / 60 = 6°)
             marker.style.transform = `rotate(${i * 6}deg)`;
             markers.appendChild(marker);
         }
 
+        // Generate 12 numbers positioned around the clock face
         for (let i = 1; i <= 12; i++) {
             const num = document.createElement('div');
             num.className = 'number';
-            const angle = (i * 30 - 90) * Math.PI / 180;
-            const radius = 160;
+            // Calculate position using trigonometry
+            // Subtract 90 to start at 12 o'clock position instead of 3 o'clock
+            const angle = (i * 30 - 90) * Math.PI / 180; // Convert to radians
+            const radius = 160; // Distance from center
             const x = Math.cos(angle) * radius;
             const y = Math.sin(angle) * radius;
             num.style.transform = `translate(${x}px, ${y}px)`;
+            // Create inner div to hold the number text
             const inner = document.createElement('div');
             inner.className = 'number-inner';
             inner.textContent = i;
@@ -250,32 +282,38 @@
             clockNumbers.appendChild(num);
         }
 
+        // Toggle between digital and analog clock modes
         toggle.addEventListener('click', () => {
             isDigital = !isDigital;
             if (isDigital) {
+                // Switch to digital mode
                 digital.style.display = 'block';
                 analog.style.display = 'none';
-                modeBtn.style.display = 'none';
+                modeBtn.style.display = 'none'; // Hide analog-specific buttons
                 numbersBtn.style.display = 'none';
                 toggle.textContent = 'ANALOG';
             } else {
+                // Switch to analog mode
                 digital.style.display = 'none';
                 analog.style.display = 'block';
-                modeBtn.style.display = 'block';
+                modeBtn.style.display = 'block'; // Show analog-specific buttons
                 numbersBtn.style.display = 'block';
                 toggle.textContent = 'DIGITAL';
             }
         });
 
+        // Toggle between tick (discrete seconds) and glide (smooth animation) modes
         modeBtn.addEventListener('click', () => {
             isGliding = !isGliding;
             modeBtn.textContent = isGliding ? 'TICK' : 'GLIDE';
             if (isGliding) {
+                // Cancel any existing animation frame and start smooth animation
                 cancelAnimationFrame(animationFrame);
                 animate();
             }
         });
 
+        // Toggle between showing numbers (1-12) and markers
         numbersBtn.addEventListener('click', () => {
             showNumbers = !showNumbers;
             const nums = document.querySelectorAll('.number');
@@ -289,13 +327,16 @@
             numbersBtn.textContent = showNumbers ? 'MARKERS' : 'NUMBERS';
         });
 
+        // Toggle visibility of all control buttons
         hideBtn.addEventListener('click', () => {
             buttonsHidden = !buttonsHidden;
             if (buttonsHidden) {
+                // Hide all buttons
                 toggle.style.display = 'none';
                 modeBtn.style.display = 'none';
                 numbersBtn.style.display = 'none';
             } else {
+                // Show buttons (respecting which ones should be visible)
                 toggle.style.display = 'block';
                 if (!isDigital) {
                     modeBtn.style.display = 'block';
@@ -304,37 +345,48 @@
             }
         });
 
+        // Update clock display (both digital and analog)
         function updateClock() {
             const now = new Date();
             const h = now.getHours();
             const m = now.getMinutes();
             const s = now.getSeconds();
-            const ms = isGliding ? now.getMilliseconds() : 0;
+            const ms = isGliding ? now.getMilliseconds() : 0; // Include milliseconds only in glide mode
 
+            // Update digital display with zero-padded time
             digital.textContent = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 
+            // Calculate rotation angles for analog clock hands
+            // Second hand: 6° per second (360° / 60 seconds)
             const secondDeg = (s + ms / 1000) * 6;
+            // Minute hand: 6° per minute + fractional degrees based on seconds
             const minuteDeg = (m + (s + ms / 1000) / 60) * 6;
+            // Hour hand: 30° per hour + fractional degrees based on minutes and seconds
             const hourDeg = ((h % 12) + (m + (s + ms / 1000) / 60) / 60) * 30;
             
+            // Apply rotation to each hand
             secondHand.style.transform = `rotate(${secondDeg}deg)`;
             minuteHand.style.transform = `rotate(${minuteDeg}deg)`;
             hourHand.style.transform = `rotate(${hourDeg}deg)`;
         }
 
+        // Animation loop for glide mode (smooth continuous animation)
         function animate() {
             updateClock();
             if (isGliding) {
+                // Continue animation loop
                 animationFrame = requestAnimationFrame(animate);
             }
         }
 
+        // Update clock every second for tick mode
         setInterval(() => {
             if (!isGliding) {
                 updateClock();
             }
         }, 1000);
         
+        // Initialize clock display
         updateClock();
     </script>
 </body>
