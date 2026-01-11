@@ -1,7 +1,7 @@
 # Time.HTML 🕒  
 **Time, time, and just time.**
 
-A minimal yet fancy way to display the current time right in your browser. Whether you’re syncing an analog clock, setting up a clean wall display, or just vibing with some visual elegance, **Time.HTML** gives you the time in style.
+....What more could you possibly ask for? It's a clock, in HTML
 
 ---
 
@@ -21,12 +21,12 @@ Here are a few things you can do with Time.HTML:
 # Locally
 1. Download or clone this repository:  
    ```bash
-   git clone https://github.com/yourusername/Time.HTML.git
+   git clone https://github.com/hypersplash/Time.HTML.git
    ```
-2. Open `Time.html` in your browser.  
+2. Open `index.html` in your browser.  
 3. Enjoy the view — it updates automatically!  
 
-If you’d like, you can tweak the HTML or CSS to customize colors, fonts, or layout.
+If you’d like, you can tweak index.html
 
 # Online
 1. Just head to [hypersplash.github.io/Time.HTML](https://hypersplash.github.io/Time.HTML/)
