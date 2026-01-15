@@ -1,4 +1,4 @@
-# Time.HTML 
+# Chrono.io
 **Time, time, and just time.**
 
 ....What more could you possibly ask for? It's a clock, in HTML
