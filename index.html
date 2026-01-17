@@ -108,6 +108,7 @@
             left: 50%;
             transform-origin: bottom center;
             background: #fff;
+            transform: translateX(-50%) rotate(var(--rotation-angle, 0deg));
         }
 
         .hour {
@@ -367,6 +368,13 @@
         }
 
         function updateAnalogClock({ hours, minutes, seconds, milliseconds }) {
+            // The gliding logic calculates fractional values for seconds, minutes, and hours.
+            // This allows for smooth, continuous movement of the hands rather than discrete ticks.
+            // The calculations are as follows:
+            // - Total seconds = current seconds + (milliseconds / 1000)
+            // - Total minutes = current minutes + (total seconds / 60)
+            // - Total hours   = (current hour % 12) + (total minutes / 60)
+            // Each total is then multiplied by its corresponding degrees-per-unit value.
             const secondsWithMs = seconds + milliseconds / 1000;
             const minutesWithSeconds = minutes + secondsWithMs / 60;
             const hoursWithMinutes = (hours % 12) + minutesWithSeconds / 60;
@@ -378,9 +386,9 @@
                 hour: hoursWithMinutes * 30      // 360° / 12 hours
             };
 
-            elements.hands.second.style.transform = `translateX(-50%) rotate(${angles.second}deg)`;
-            elements.hands.minute.style.transform = `translateX(-50%) rotate(${angles.minute}deg)`;
-            elements.hands.hour.style.transform = `translateX(-50%) rotate(${angles.hour}deg)`;
+            elements.hands.second.style.setProperty('--rotation-angle', `${angles.second}deg`);
+            elements.hands.minute.style.setProperty('--rotation-angle', `${angles.minute}deg`);
+            elements.hands.hour.style.setProperty('--rotation-angle', `${angles.hour}deg`);
         }
 
         // Recursive animation loop for glide mode
