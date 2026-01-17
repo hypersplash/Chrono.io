@@ -160,12 +160,6 @@
         .number.show {
             display: flex;
         }
-
-        .number-inner {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
     </style>
 </head>
 <body>
@@ -264,11 +258,7 @@
                 const y = Math.sin(angle) * RADIUS;
                 
                 num.style.transform = `translate(${x}px, ${y}px)`;
-                
-                const inner = document.createElement('div');
-                inner.className = 'number-inner';
-                inner.textContent = i;
-                num.appendChild(inner);
+                num.textContent = i;
                 
                 elements.clockNumbers.appendChild(num);
             }
