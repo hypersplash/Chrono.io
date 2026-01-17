@@ -55,7 +55,7 @@
 
         #numbers {
             top: 20px;
-            right: 340px;
+            right: 380px;
             display: none;
         }
 
@@ -294,12 +294,14 @@
             if (state.isDigital) {
                 elements.digital.style.display = 'block';
                 elements.analog.style.display = 'none';
+                elements.format.style.display = 'block';
                 elements.mode.style.display = 'none';
                 elements.numbers.style.display = 'none';
                 elements.toggle.textContent = 'ANALOG';
             } else {
                 elements.digital.style.display = 'none';
                 elements.analog.style.display = 'block';
+                elements.format.style.display = 'none';
                 elements.mode.style.display = 'block';
                 elements.numbers.style.display = 'block';
                 elements.toggle.textContent = 'DIGITAL';
@@ -309,6 +311,7 @@
         function toggleTimeFormat() {
             state.is24Hour = !state.is24Hour;
             elements.format.textContent = state.is24Hour ? '12H' : '24H';
+            updateClock();
         }
 
         function toggleGlideMode() {
@@ -339,9 +342,11 @@
                 elements.numbers.style.display = 'none';
             } else {
                 elements.toggle.style.display = 'block';
-                elements.format.style.display = 'block';
-                // Only show analog-specific buttons if in analog mode
-                if (!state.isDigital) {
+                
+                // Only show mode-specific buttons based on current mode
+                if (state.isDigital) {
+                    elements.format.style.display = 'block';
+                } else {
                     elements.mode.style.display = 'block';
                     elements.numbers.style.display = 'block';
                 }
