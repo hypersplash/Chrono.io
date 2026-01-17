@@ -42,16 +42,21 @@
             right: 20px;
         }
 
-        #mode {
+        #format {
             top: 20px;
             right: 140px;
-            display: none; /* Only visible in analog mode */
+        }
+
+        #mode {
+            top: 20px;
+            right: 260px;
+            display: none;
         }
 
         #numbers {
-            top: 60px;
-            right: 20px;
-            display: none; /* Only visible in analog mode */
+            top: 20px;
+            right: 340px;
+            display: none;
         }
 
         #hideBtn {
@@ -170,6 +175,7 @@
 </head>
 <body>
     <button id="toggle" class="btn">ANALOG</button>
+    <button id="format" class="btn">12H</button>
     <button id="mode" class="btn">GLIDE</button>
     <button id="numbers" class="btn">NUMBERS</button>
     <button id="hideBtn" class="btn">HIDE</button>
@@ -188,11 +194,14 @@
     </div>
 
     <script>
-        // === DOM REFERENCES ===
+        // ============================================
+        // DOM REFERENCES
+        // ============================================
         const elements = {
             digital: document.getElementById('digital'),
             analog: document.getElementById('analog'),
             toggle: document.getElementById('toggle'),
+            format: document.getElementById('format'),
             mode: document.getElementById('mode'),
             numbers: document.getElementById('numbers'),
             hide: document.getElementById('hideBtn'),
@@ -205,16 +214,21 @@
             clockNumbers: document.getElementById('clockNumbers')
         };
 
-        // === STATE ===
+        // ============================================
+        // STATE
+        // ============================================
         const state = {
             isDigital: true,
             isGliding: false,
             showNumbers: false,
+            is24Hour: true,
             buttonsHidden: false,
             animationFrame: null
         };
 
-        // === INITIALIZATION ===
+        // ============================================
+        // INITIALIZATION
+        // ============================================
         function init() {
             generateMarkers();
             generateNumbers();
@@ -263,9 +277,12 @@
             }
         }
 
-        // === EVENT HANDLERS ===
+        // ============================================
+        // EVENT HANDLERS
+        // ============================================
         function attachEventListeners() {
             elements.toggle.addEventListener('click', toggleClockMode);
+            elements.format.addEventListener('click', toggleTimeFormat);
             elements.mode.addEventListener('click', toggleGlideMode);
             elements.numbers.addEventListener('click', toggleNumbers);
             elements.hide.addEventListener('click', toggleButtonVisibility);
@@ -287,6 +304,11 @@
                 elements.numbers.style.display = 'block';
                 elements.toggle.textContent = 'DIGITAL';
             }
+        }
+
+        function toggleTimeFormat() {
+            state.is24Hour = !state.is24Hour;
+            elements.format.textContent = state.is24Hour ? '12H' : '24H';
         }
 
         function toggleGlideMode() {
@@ -312,10 +334,12 @@
             
             if (state.buttonsHidden) {
                 elements.toggle.style.display = 'none';
+                elements.format.style.display = 'none';
                 elements.mode.style.display = 'none';
                 elements.numbers.style.display = 'none';
             } else {
                 elements.toggle.style.display = 'block';
+                elements.format.style.display = 'block';
                 // Only show analog-specific buttons if in analog mode
                 if (!state.isDigital) {
                     elements.mode.style.display = 'block';
@@ -324,7 +348,9 @@
             }
         }
 
-        // === CLOCK UPDATE LOGIC ===
+        // ============================================
+        // CLOCK UPDATE LOGIC
+        // ============================================
         function updateClock() {
             const now = new Date();
             const time = {
@@ -340,7 +366,15 @@
 
         function updateDigitalClock({ hours, minutes, seconds }) {
             const pad = n => n.toString().padStart(2, '0');
-            elements.digital.textContent = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+            let displayHours = hours;
+            let suffix = '';
+            
+            if (!state.is24Hour) {
+                suffix = hours >= 12 ? ' PM' : ' AM';
+                displayHours = hours % 12 || 12;
+            }
+            
+            elements.digital.textContent = `${pad(displayHours)}:${pad(minutes)}:${pad(seconds)}${suffix}`;
         }
 
         function updateAnalogClock({ hours, minutes, seconds, milliseconds }) {
@@ -368,7 +402,9 @@
             }
         }
 
-        // === START ===
+        // ============================================
+        // START
+        // ============================================
         init();
     </script>
 </body>
